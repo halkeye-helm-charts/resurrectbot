@@ -32,23 +32,29 @@ spec:
               value: {{ .Values.resurrectbot.slack.bot_token | quote }}
             - name: SLACK_AUTH_TOKEN
               value: {{ .Values.resurrectbot.slack.auth_token | quote }}
+            {{- if .Values.resurrectbot.slack.token }}
+            - name: SLACK_TOKEN
+              value: {{ .Values.resurrectbot.slack.token }}
+            {{- end }}
+            - name: FLASK_ENV
+              value: prod
             - name: DATABASE_URL
               value: "{{ .Values.resurrectbot.database.type }}://{{ .Values.resurrectbot.database.username }}:{{ .Values.resurrectbot.database.password }}@{{ .Values.resurrectbot.database.hostname }}/{{ .Values.resurrectbot.database.name }}"
-            {{- if .Values.resurrectbot.rollbar }}
-            - name: ROLLBAR_TOKEN
-              value: {{ .Values.resurrectbot.rollbar }}
+            {{- if .Values.resurrectbot.sentry }}
+            - name: SENTRY_TOKEN
+              value: {{ .Values.resurrectbot.sentry }}
             {{- end }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 3000
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthcheck
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthcheck
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
